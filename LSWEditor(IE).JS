@@ -58,6 +58,7 @@ editPlace.style.height = height*0.92+'px';
 editPlace.addEventListener('load',function(){
     editPlace.contentDocument.body.contentEditable = 'true';
     editPlace.contentDocument.body.style.wordBreak = 'break-all';
+    editPlace.contentDocument.body.innerHTML = '<p></p>';
 })
 div1.appendChild(editPlace);
 
@@ -72,7 +73,7 @@ function CreateButton(buttonName){
         else{
           e.preventDefault();
         }
-        editPlace.contentDocument.execCommand(buttonName);
+        editPlace.contentDocument.execCommand(buttonName,false,null); 
     }
     buttonPlace.contentDocument.body.appendChild(but1);
 }
