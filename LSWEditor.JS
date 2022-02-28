@@ -48,7 +48,7 @@ class LSWEditor {
             editPlace.contentDocument.body.contentEditable = 'true';
             editPlace.contentDocument.spellcheck = 'false';
             editPlace.contentDocument.body.style.fontFamily = '굴림';
-            editPlace.contentDocument.body.style.fontSize = '10px';
+            editPlace.contentDocument.body.style.fontSize = '16px';
             editPlace.contentDocument.body.style.zoom = 1.5;
         })
         div1.appendChild(editPlace);
