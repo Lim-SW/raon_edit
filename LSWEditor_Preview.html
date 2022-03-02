@@ -10,6 +10,7 @@
 <script>
     var content = window.opener.document.getElementById('editPlace').contentDocument.body.innerHTML;
     document.getElementById('preview').innerHTML = content;
+    document.getElementById('preview').style.wordBreak = 'break-all';
 </script>
 
 </html>
