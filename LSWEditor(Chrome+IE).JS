@@ -1,16 +1,16 @@
-// 인자값 저장
-var id = para['id'];
+// 초기 선언
+var id = para['id']; // 넘겨받은 인자값들 저장 (Constructor)
 var width = para['width'];
 var height = para['height'];
 var divName = document.getElementById(para['divName']);
 var ie = false;
 if(isIE()){ ie = true; } // 브라우저가 IE인지 값 저장
-
 Init();
 var buttonPlace = document.getElementById('buttonPlace'); // iframe 전역선언
 var editPlace = document.getElementById('editPlace');
+if(ie==false){LoadCSS();}
 
-function Init(){
+function Init(){// 에디터 생성 함수
     // 전체영역 div
     var div1 = document.createElement('div');
     div1.id = 'main';
@@ -56,8 +56,8 @@ function Init(){
         CreateSelect(fontFamList,buttonPlace_div1);
 
         if(ie==true){
-            var fontColList = {'key':'color','검정':'#5fbcf1','빨강':'red','파랑':'blue','초록':'green','노랑':'yellow','주황':'orange','회색':'gray','흰색':'white'};
-            var backColList = {'key':'backcolor','검정':'black','빨강':'red','파랑':'blue','초록':'green','노랑':'yellow','주황':'orange','회색':'gray','흰색':'white'};
+            var fontColList = {'key':'color','검정':'#000000','빨강':'#FF0000','파랑':'#0000FF','초록':'#008000','노랑':'#FFFF00','주황':'#FFA500','회색':'#808080','흰색':'#FFFFFF'};
+            var backColList = {'key':'backcolor','검정':'#000000','빨강':'#FF0000','파랑':'#0000FF','초록':'#008000','노랑':'#FFFF00','주황':'#FFA500','회색':'#808080','흰색':'#FFFFFF'};
             CreateSelect(fontColList,buttonPlace_div1);
             CreateSelect(backColList,buttonPlace_div1);
         }
@@ -80,14 +80,21 @@ function Init(){
         prevBut.onclick = function(){PreViewPop('test')};
         prevBut.style.float = 'right';
         buttonPlace_div1.appendChild(prevBut);
+
+        buttonPlace.contentDocument.body.onmouseup = function(e){
+            CheckStyle();
+        }
+
+        if(ie==true){LoadCSS();}
     })
 
     div1.appendChild(buttonPlace); // 전체영역에 버튼영역 추가
 
     // 에디터영역
     var editPlace = document.createElement('iframe');
-    editPlace.id = 'editPlace'
+    editPlace.id = 'editPlace';
     editPlace.src = 'about:blank';
+    editPlace.className = 'editPlace'
     editPlace.frameBorder = 0;
     editPlace.style.width = width+'px';
     editPlace.style.height = height*0.88+'px';
@@ -95,21 +102,24 @@ function Init(){
         editPlace.contentDocument.body.contentEditable = 'true'; // 수정가능한 iframe으로 생성
         editPlace.contentDocument.body.style.wordBreak = 'break-all'; // 줄바꾸기 설정
 
+        var cssLink = document.createElement("link");
+        cssLink.href = "LSWEditor(Chrome+IE).css";  
+        cssLink.rel = "stylesheet";  
+        cssLink.type = "text/css";  
+        editPlace.contentDocument.body.appendChild(cssLink); 
+
         if(ie){// IE용 사이즈 조절
         buttonPlace.style.height = height*0.14+'px';
         editPlace.style.height = height*0.86+'px';
         editPlace.contentDocument.body.style.marginRight = '0px';
         }
-        /*
+        
         editPlace.contentDocument.body.onmouseup = function(e){ // 체크 하는 방법 이걸로 해야함
-            console.log(editPlace.contentDocument.queryCommandValue('fontname'));
-            console.log(editPlace.contentDocument.queryCommandValue('fontsize'));
-            console.log(ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
-            console.log(ColorName(editPlace.contentDocument.queryCommandValue('backcolor')));
-            console.log(editPlace.contentDocument.queryCommandValue('bold'));
-            console.log(editPlace.contentDocument.queryCommandValue('italic'));
-            console.log(editPlace.contentDocument.queryCommandValue('StrikeThrough'));
-        }*/
+            CheckStyle();
+        }
+        editPlace.contentDocument.body.onkeydown = function(e){
+            CheckStyle();
+        }
     })
 
     div1.appendChild(editPlace);
@@ -154,12 +164,12 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
             }
             else if(ifKey=='color'){
                 temp.innerText = '글자색';
-                temp.id = '글자색';
+                temp.id = 'color#000000';
                 temp.selected = true;
             }
             else if(ifKey=='backcolor'){
                 temp.innerText = '글배경색';
-                temp.id = '글배경색';
+                temp.id = 'backcolor#ffffff';
                 temp.selected = true;
             }
             select.appendChild(temp);
@@ -201,10 +211,10 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
                     buttonPlace.contentDocument.getElementById('글꼴').selected = true;
                 }
                 else if(this.id=='select color'){
-                    buttonPlace.contentDocument.getElementById('글자색').selected = true;
+                    buttonPlace.contentDocument.getElementById('color#000000').selected = true;
                 }
                 else if(this.id=='select backcolor'){
-                    buttonPlace.contentDocument.getElementById('글배경색').selected = true;
+                    buttonPlace.contentDocument.getElementById('backcolor#ffffff').selected = true;
                 }
             }
 
@@ -268,7 +278,7 @@ function ForIE(param1, param2, param3){ // 브라우저 IE 면 selection, range�
     s.addRange(selRange);
 }
 
-function MakeColorPicker(name, div){
+function MakeColorPicker(name, div){ // 컬러픽커 생성 함수
     var colorPicker = document.createElement('input');
     colorPicker.type = 'color';
     colorPicker.id = name;
@@ -300,4 +310,65 @@ function MakeColorPicker(name, div){
     
     div.appendChild(cLabel);
     div.appendChild(colorPicker);
+}
+
+function ColorName(rgb) { // 색상 hex값으로 반환
+    if(ie==true){
+        var r = Math.floor(rgb / ( 256 * 256 ));
+        var g = Math.floor(rgb / 256 ) % 256;
+        var b = rgb % 256;
+        var tempName =  "#" +
+         ("0" + parseInt(b,10).toString(16)).slice(-2) +
+         ("0" + parseInt(g,10).toString(16)).slice(-2) +
+         ("0" + parseInt(r,10).toString(16)).slice(-2);
+    }
+
+    else{
+        if(rgb == 'rgba(0, 0, 0, 0)'){rgb = 'rgb(255, 255, 255)';}
+        
+        rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        var tempName =  "#" +
+         ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+         ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+         ("0" + parseInt(rgb[3],10).toString(16)).slice(-2);
+    }
+
+    return tempName.toUpperCase();
+}
+
+function LoadCSS(){
+    var cssLink = document.createElement("link");
+    cssLink.href = "LSWEditor(Chrome+IE).css";  
+    cssLink.rel = "stylesheet";  
+    cssLink.type = "text/css";  
+    buttonPlace.contentDocument.body.appendChild(cssLink);
+}
+
+function CheckStyle(){
+    var checkList = {'bold':'B','italic':'I','underline':'U','StrikeThrough':'S',
+    /*'justifyFull':'Full','justifyLeft':'Left','justifyCenter':'Center','justifyRight':'Right'*/}
+
+    for(var b in checkList){
+        var tempB = buttonPlace.contentDocument.getElementById(checkList[b]);
+        if(String(editPlace.contentDocument.queryCommandValue(b))=='true'){tempB.style.borderStyle = "inset";}
+        else{if(ie==false){tempB.style.borderStyle = "outset";}else{tempB.style.borderStyle = "";}}
+    }
+
+    var tempF = buttonPlace.contentDocument.getElementById('family'+editPlace.contentDocument.queryCommandValue('fontname'));
+    tempF.selected = true;
+    
+    var tempS = buttonPlace.contentDocument.getElementById('size'+editPlace.contentDocument.queryCommandValue('fontsize'));
+    tempS.selected = true;
+    
+    /*
+    if(ie==true){
+        console.log('color'+ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
+        var tempFC = buttonPlace.contentDocument.getElementById('color'+ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
+        tempFC.selected = true;
+        var tempBC = buttonPlace.contentDocument.getElementById('backcolor'+ColorName(editPlace.contentDocument.queryCommandValue('backcolor')));
+        tempBC.selected = true;
+    }*/
+
+    //console.log(ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
+    //console.log(ColorName(editPlace.contentDocument.queryCommandValue('backcolor')));
 }
