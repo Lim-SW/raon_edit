@@ -1,6 +1,7 @@
 function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     if(width < 500){width = 500;}
-    if(height < 100){height = 100;}
+    if(height < 400 && IsIE()){height = 400;}
+    else if(height < 100){height = 100;}
     
     // 전체영역 div
     var div1 = document.createElement('div');
@@ -9,6 +10,8 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     div1.style.height = height+'px';
     div1.style.border = '2px solid gray';
     div1.style.overflow = 'hidden';
+    div1.style.position = 'relative';
+    div1.style.zIndex = 2;
 
     document.getElementById(divName).appendChild(div1); // 받아온 div아래에 에디터 추가
 
@@ -97,6 +100,8 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     editPlace.frameBorder = 0;
     editPlace.style.width = width+'px';
     editPlace.style.height = height+'px';
+    editPlace.style.position = 'relative';
+    editPlace.style.zIndex = 1;
     editPlace.addEventListener('load',function(){ // 에디터영역의 iframe이 로드 되면 실행 (오류방지)
         editPlace.contentDocument.body.contentEditable = 'true'; // 수정가능한 iframe으로 생성
         editPlace.contentDocument.body.style.wordBreak = 'break-all'; // 줄바꾸기 설정
