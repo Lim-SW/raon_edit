@@ -7,4 +7,5 @@ LSWEditor(Class).JS
 
 *.zip
 
-/release
+/execCommand
+/Class (OnlyChrome)
