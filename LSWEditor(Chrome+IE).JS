@@ -10,8 +10,6 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     div1.style.height = height+'px';
     div1.style.border = '2px solid gray';
     div1.style.overflow = 'hidden';
-    div1.style.position = 'relative';
-    div1.style.zIndex = 2;
 
     document.getElementById(divName).appendChild(div1); // 받아온 div아래에 에디터 추가
 
@@ -19,8 +17,8 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     var buttonPlace = document.createElement('iframe');
     buttonPlace.id = 'buttonPlace'
     buttonPlace.frameBorder = 0;
+    buttonPlace.style.height = height+'px';
     buttonPlace.style.width = width+'px';
-    buttonPlace.style.height = '60px';
     buttonPlace.style.background = '#31648c';
     buttonPlace.addEventListener('load',function(){ // 버튼영역의 iframe이 로드 되면 실행 (오류방지)
         var buttonPlace_div1 = document.createElement('div'); // 버튼영역 1번째 줄
@@ -33,13 +31,13 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
         buttonPlace.contentDocument.body.style.overflow = 'hidden'; // 버튼영역 늘어남 방지
 
         // 1번째 줄 버튼 추가
-        var bold = CreateButton('B','Bold',buttonPlace_div1);
+        var bold = CreateButton('B','Bold',buttonPlace_div1,null);
         bold.style.fontWeight = 'bold';
-        var italic = CreateButton('I','Italic',buttonPlace_div1);
+        var italic = CreateButton('I','Italic',buttonPlace_div1,null);
         italic.style.fontStyle = 'italic';
-        var underline = CreateButton('U','Underline',buttonPlace_div1);
+        var underline = CreateButton('U','Underline',buttonPlace_div1,null);
         underline.style.textDecoration = 'underline';
-        var strikethrough = CreateButton('S','StrikeThrough',buttonPlace_div1);
+        var strikethrough = CreateButton('S','StrikeThrough',buttonPlace_div1,null);
         strikethrough.style.textDecoration = 'line-through';
 
         // 1번째 줄 셀렉트박스 추가
@@ -63,9 +61,10 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
 
         // 2번째줄 버튼 추가
         //CreateButton('Full','justifyFull',buttonPlace_div2);
-        CreateButton('Left','justifyleft',buttonPlace_div2);
-        CreateButton('Center','justifycenter',buttonPlace_div2);
-        CreateButton('Right','justifyright',buttonPlace_div2);
+        CreateButton('Left','justifyleft',buttonPlace_div2,null);
+        CreateButton('Center','justifycenter',buttonPlace_div2,null);
+        CreateButton('Right','justifyright',buttonPlace_div2,null);
+        CreateButton('Image','insertImage',buttonPlace_div2,'src');
 
         // 미리보기 버튼 추가
         var prevBut = document.createElement('button');
@@ -99,9 +98,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     editPlace.className = 'editPlace'
     editPlace.frameBorder = 0;
     editPlace.style.width = width+'px';
-    editPlace.style.height = height+'px';
-    editPlace.style.position = 'relative';
-    editPlace.style.zIndex = 1;
+    editPlace.style.height = height-60+'px';
     editPlace.addEventListener('load',function(){ // 에디터영역의 iframe이 로드 되면 실행 (오류방지)
         editPlace.contentDocument.body.contentEditable = 'true'; // 수정가능한 iframe으로 생성
         editPlace.contentDocument.body.style.wordBreak = 'break-all'; // 줄바꾸기 설정
@@ -139,7 +136,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     div1.appendChild(editPlace); // 전체영역에 에디터영역 추가
 }
 
-function CreateButton(buttonName, buttonValue, div){ // 버튼 생성 함수
+function CreateButton(buttonName, buttonValue, div, val){ // 버튼 생성 함수
     var but1 = document.createElement('button');
     but1.id = buttonName;
     but1.value = buttonValue;
@@ -151,7 +148,10 @@ function CreateButton(buttonName, buttonValue, div){ // 버튼 생성 함수
         else{
           e.preventDefault();
         }
-        ApplyExCo(buttonValue,false,null);
+        if(val == 'src'){
+            var tempVal = prompt("URL 혹은 로컬이미지 주소를 입력해주세요.", "");
+        }
+        ApplyExCo(buttonValue,false,tempVal);
     }
     div.appendChild(but1);
 
