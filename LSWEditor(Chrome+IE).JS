@@ -1,25 +1,13 @@
-// 초기 선언
-var id = para['id']; // 넘겨받은 인자값들 저장 (Constructor)
-var width = para['width'];
-var height = para['height'];
-var divName = document.getElementById(para['divName']);
-var ie = false;
-if(isIE()){ ie = true; } // 브라우저가 IE인지 값 저장
-Init();
-var buttonPlace = document.getElementById('buttonPlace'); // iframe 전역선언
-var editPlace = document.getElementById('editPlace');
-if(ie==false){LoadCSS();}
-
-function Init(){// 에디터 생성 함수
+function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     // 전체영역 div
     var div1 = document.createElement('div');
-    div1.id = 'main';
+    div1.id = id;
     div1.style.width = width+'px';
     div1.style.height = height+'px';
     div1.style.border = '2px solid gray';
     div1.style.overflow = 'hidden';
 
-    divName.appendChild(div1); // 받아온 div아래에 에디터 추가
+    document.getElementById(divName).appendChild(div1); // 받아온 div아래에 에디터 추가
 
     // 버튼영역
     var buttonPlace = document.createElement('iframe');
@@ -55,7 +43,7 @@ function Init(){// 에디터 생성 함수
         CreateSelect(fontSizeList,buttonPlace_div1);
         CreateSelect(fontFamList,buttonPlace_div1);
 
-        if(ie==true){
+        if(IsIE()){
             var fontColList = {'key':'color','검정':'#000000','빨강':'#FF0000','파랑':'#0000FF','초록':'#008000','노랑':'#FFFF00','주황':'#FFA500','회색':'#808080','흰색':'#FFFFFF'};
             var backColList = {'key':'backcolor','검정':'#000000','빨강':'#FF0000','파랑':'#0000FF','초록':'#008000','노랑':'#FFFF00','주황':'#FFA500','회색':'#808080','흰색':'#FFFFFF'};
             CreateSelect(fontColList,buttonPlace_div1);
@@ -68,7 +56,7 @@ function Init(){// 에디터 생성 함수
         }
 
         // 2번째줄 버튼 추가
-        CreateButton('Full','justifyFull',buttonPlace_div2);
+        //CreateButton('Full','justifyFull',buttonPlace_div2);
         CreateButton('Left','justifyleft',buttonPlace_div2);
         CreateButton('Center','justifycenter',buttonPlace_div2);
         CreateButton('Right','justifyright',buttonPlace_div2);
@@ -81,17 +69,19 @@ function Init(){// 에디터 생성 함수
         prevBut.style.float = 'right';
         buttonPlace_div1.appendChild(prevBut);
         
-        if(ie==false){
+        if(IsIE()==false){
             buttonPlace.contentDocument.body.onmouseup = function(e){
                 CheckStyle();
             }   
         }
 
-        else{LoadCSS();
+        else{LoadCSS(buttonPlace);
             buttonPlace.contentDocument.body.onmousedown = function(e){
                 CheckStyle();
             }   
         }
+
+        LSW_buttonPlace = buttonPlace;
     })
 
     div1.appendChild(buttonPlace); // 전체영역에 버튼영역 추가
@@ -108,18 +98,34 @@ function Init(){// 에디터 생성 함수
         editPlace.contentDocument.body.contentEditable = 'true'; // 수정가능한 iframe으로 생성
         editPlace.contentDocument.body.style.wordBreak = 'break-all'; // 줄바꾸기 설정
 
-        if(ie){// IE용 사이즈 조절
+        if(IsIE()){// IE용 사이즈 조절
         buttonPlace.style.height = height*0.14+'px';
         editPlace.style.height = height*0.86+'px';
         editPlace.contentDocument.body.style.marginRight = '0px';
         }
-        
+        else{
+            LoadCSS(editPlace);
+            LoadCSS(buttonPlace);
+        }
         editPlace.contentDocument.body.onmouseup = function(e){ // 체크 하는 방법 이걸로 해야함
             CheckStyle();
+            if(editPlace.contentDocument.body.firstChild == null){
+                AddP(editPlace);
+            }
         }
         editPlace.contentDocument.body.onkeydown = function(e){
             CheckStyle();
+            if(editPlace.contentDocument.body.firstChild == null){
+                AddP(editPlace);
+            }
         }
+        editPlace.contentDocument.body.onkeyup = function(e){
+            if(editPlace.contentDocument.body.firstChild == null){
+                AddP(editPlace);
+            }
+        }
+
+        LSW_editPlace = editPlace;
     })
 
     div1.appendChild(editPlace);
@@ -138,7 +144,6 @@ function CreateButton(buttonName, buttonValue, div){ // 버튼 생성 함수
           e.preventDefault();
         }
         ApplyExCo(buttonValue,false,null);
-        //editPlace.contentDocument.body.focus();
     }
     div.appendChild(but1);
 
@@ -204,6 +209,7 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
             select.appendChild(temp);
 
             select.onmousedown = function(){
+                var buttonPlace = document.getElementById('buttonPlace');
                 if(this.id=='select size'){
                     buttonPlace.contentDocument.getElementById('글자크기').selected = true;
                 }
@@ -219,6 +225,7 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
             }
 
             select.onchange = function(m) {
+                var editPlace = document.getElementById('editPlace');
                 if(ifKey=='size'){
                     ApplyExCo("FontSize",false,select.options[select.selectedIndex].value)
                 }
@@ -238,7 +245,8 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
 }
 
 function ApplyExCo(param1, param2, param3){ // execcommand 적용 통합
-    if(ie){
+    var editPlace = document.getElementById('editPlace');
+    if(IsIE()){
         ForIE(param1, param2, param3);
     }
     else{
@@ -247,7 +255,8 @@ function ApplyExCo(param1, param2, param3){ // execcommand 적용 통합
 }
 
 function PreViewPop(content){ // 미리보기 팝업 함수
-    if(ie){
+    var editPlace = document.getElementById('editPlace');
+    if(IsIE()){
         window.open("LSWEditor_Preview.html",content,'width='+width+',height='+editPlace.offsetHeight+',toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes');    
     }
     else{
@@ -255,15 +264,16 @@ function PreViewPop(content){ // 미리보기 팝업 함수
     }
 }
 
-function isIE() { // 브라우저 IE 체크 함수
+function IsIE() { // 브라우저 IE 체크 함수
     return document.all || (!!window.MSInputMethodContext && !!document.documentMode);
 }
 
 function ForIE(param1, param2, param3){ // 브라우저 IE 면 selection, range도 적용
+    var editPlace = document.getElementById('editPlace');
     var s = editPlace.contentDocument.getSelection();
     var selRange = s.getRangeAt(0);
 
-    var newNode = editPlace.contentDocument.createTextNode('d');
+    var newNode = editPlace.contentDocument.createTextNode('.');
     selRange.insertNode(newNode);
     s.removeAllRanges();
     s.addRange(selRange);
@@ -299,6 +309,7 @@ function MakeColorPicker(name, div){ // 컬러픽커 생성 함수
     colorPicker.appendChild(cLabel);
     
     colorPicker.onchange = function(e){
+        var editPlace = document.getElementById('editPlace');
         ApplyExCo(name,false,e.target.value);
         editPlace.contentDocument.body.focus();
     }
@@ -307,8 +318,8 @@ function MakeColorPicker(name, div){ // 컬러픽커 생성 함수
     div.appendChild(colorPicker);
 }
 
-function ColorName(rgb) { // 색상 hex값으로 반환
-    if(ie==true){
+function ColorName(rgb) { // 색상 hex값으로 반환함수
+    if(IsIE()){
         var r = Math.floor(rgb / ( 256 * 256 ));
         var g = Math.floor(rgb / 256 ) % 256;
         var b = rgb % 256;
@@ -331,22 +342,24 @@ function ColorName(rgb) { // 색상 hex값으로 반환
     return tempName.toUpperCase();
 }
 
-function LoadCSS(){
+function LoadCSS(where){ // 해당영역의 iframe에 CSS 로드함수
     var cssLink = document.createElement("link");
     cssLink.href = "LSWEditor(Chrome+IE).css";  
     cssLink.rel = "stylesheet";  
     cssLink.type = "text/css";  
-    buttonPlace.contentDocument.body.appendChild(cssLink);
+    where.contentDocument.head.appendChild(cssLink);
 }
 
-function CheckStyle(){
+function CheckStyle(){ // 현재 적용된 스타일 확인 함수
+    var buttonPlace = document.getElementById('buttonPlace');
+    var editPlace = document.getElementById('editPlace');
     var checkList = {'bold':'B','italic':'I','underline':'U','StrikeThrough':'S',
     /*'justifyFull':'Full','justifyLeft':'Left','justifyCenter':'Center','justifyRight':'Right'*/}
 
     for(var b in checkList){
         var tempB = buttonPlace.contentDocument.getElementById(checkList[b]);
         if(String(editPlace.contentDocument.queryCommandValue(b))=='true'){tempB.style.borderStyle = "inset";}
-        else{if(ie==false){tempB.style.borderStyle = "outset";}else{tempB.style.borderStyle = "";}}
+        else{if(IsIE()==false){tempB.style.borderStyle = "outset";}else{tempB.style.borderStyle = "";}}
     }
 
     var tempF = buttonPlace.contentDocument.getElementById('family'+editPlace.contentDocument.queryCommandValue('fontname'));
@@ -359,9 +372,8 @@ function CheckStyle(){
         tempS.selected = true;
     }
     
-    if(ie==true){
+    if(IsIE()){
         var tempFC = buttonPlace.contentDocument.getElementById('color'+ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
-        console.log(editPlace.contentDocument.queryCommandValue('forecolor'));
         if(tempFC!=null){
             tempFC.selected = true;
         }
@@ -376,4 +388,26 @@ function CheckStyle(){
         var colorPickerFC = buttonPlace.contentDocument.getElementById('backcolor');
         colorPickerFC.value = ColorName(editPlace.contentDocument.queryCommandValue('backcolor'));
     }
+}
+
+function AddP(editPlace){ // 에디터영역 맨 처음부분에 P태그 없을시 추가해주는 함수
+    var editPlace = document.getElementById('editPlace');
+    // p 태그 추가 후 포커스 조절
+    var s = editPlace.contentDocument.getSelection();
+    var selRange = s.getRangeAt(0);
+
+    var newNode = editPlace.contentDocument.createElement('p');
+    if(IsIE()==false){
+        newNode.innerHTML = '<br>';
+    }
+    else{
+        newNode.innerHTML = '';
+    }
+    selRange.insertNode(newNode);
+
+    selRange.setStart(newNode, 0);
+    selRange.setEnd(newNode, 0);
+
+    s.removeAllRanges();
+    s.addRange(selRange);
 }
