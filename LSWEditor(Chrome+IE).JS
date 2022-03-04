@@ -80,12 +80,18 @@ function Init(){// 에디터 생성 함수
         prevBut.onclick = function(){PreViewPop('test')};
         prevBut.style.float = 'right';
         buttonPlace_div1.appendChild(prevBut);
-
-        buttonPlace.contentDocument.body.onmouseup = function(e){
-            CheckStyle();
+        
+        if(ie==false){
+            buttonPlace.contentDocument.body.onmouseup = function(e){
+                CheckStyle();
+            }   
         }
 
-        if(ie==true){LoadCSS();}
+        else{LoadCSS();
+            buttonPlace.contentDocument.body.onmousedown = function(e){
+                CheckStyle();
+            }   
+        }
     })
 
     div1.appendChild(buttonPlace); // 전체영역에 버튼영역 추가
@@ -101,12 +107,6 @@ function Init(){// 에디터 생성 함수
     editPlace.addEventListener('load',function(){ // 에디터영역의 iframe이 로드 되면 실행 (오류방지)
         editPlace.contentDocument.body.contentEditable = 'true'; // 수정가능한 iframe으로 생성
         editPlace.contentDocument.body.style.wordBreak = 'break-all'; // 줄바꾸기 설정
-
-        var cssLink = document.createElement("link");
-        cssLink.href = "LSWEditor(Chrome+IE).css";  
-        cssLink.rel = "stylesheet";  
-        cssLink.type = "text/css";  
-        editPlace.contentDocument.body.appendChild(cssLink); 
 
         if(ie){// IE용 사이즈 조절
         buttonPlace.style.height = height*0.14+'px';
@@ -164,12 +164,12 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
             }
             else if(ifKey=='color'){
                 temp.innerText = '글자색';
-                temp.id = 'color#000000';
+                temp.id = 'color';
                 temp.selected = true;
             }
             else if(ifKey=='backcolor'){
                 temp.innerText = '글배경색';
-                temp.id = 'backcolor#ffffff';
+                temp.id = 'backcolor#FFFFFF';
                 temp.selected = true;
             }
             select.appendChild(temp);
@@ -214,7 +214,7 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
                     buttonPlace.contentDocument.getElementById('color#000000').selected = true;
                 }
                 else if(this.id=='select backcolor'){
-                    buttonPlace.contentDocument.getElementById('backcolor#ffffff').selected = true;
+                    buttonPlace.contentDocument.getElementById('backcolor#FFFFFF').selected = true;
                 }
             }
 
@@ -291,21 +291,16 @@ function MakeColorPicker(name, div){ // 컬러픽커 생성 함수
 
     var cLabel = document.createElement('label');
     var labelT = '';
-    if(name == 'forecolor'){
-        labelT = '  글자색'
-    }
-    else{
-        labelT = '  배경색'
-    }
+    if(name == 'forecolor'){labelT = '  글자색'}
+    else{labelT = '  글배경색';colorPicker.value = '#FFFFFF';}
     cLabel.textContent = labelT+ '☞' 
     cLabel.style.fontSize = '13px'
-    cLabel.style.color = '#ffffff'
+    cLabel.style.color = '#FFFFFF'
     colorPicker.appendChild(cLabel);
     
     colorPicker.onchange = function(e){
         ApplyExCo(name,false,e.target.value);
         editPlace.contentDocument.body.focus();
-        //console.log(e.target.value)
     }
     
     div.appendChild(cLabel);
@@ -355,20 +350,30 @@ function CheckStyle(){
     }
 
     var tempF = buttonPlace.contentDocument.getElementById('family'+editPlace.contentDocument.queryCommandValue('fontname'));
-    tempF.selected = true;
+    if(tempF!=null){
+        tempF.selected = true;
+    }
     
     var tempS = buttonPlace.contentDocument.getElementById('size'+editPlace.contentDocument.queryCommandValue('fontsize'));
-    tempS.selected = true;
+    if(tempS!=null){
+        tempS.selected = true;
+    }
     
-    /*
     if(ie==true){
-        console.log('color'+ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
         var tempFC = buttonPlace.contentDocument.getElementById('color'+ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
-        tempFC.selected = true;
+        console.log(editPlace.contentDocument.queryCommandValue('forecolor'));
+        if(tempFC!=null){
+            tempFC.selected = true;
+        }
         var tempBC = buttonPlace.contentDocument.getElementById('backcolor'+ColorName(editPlace.contentDocument.queryCommandValue('backcolor')));
-        tempBC.selected = true;
-    }*/
-
-    //console.log(ColorName(editPlace.contentDocument.queryCommandValue('forecolor')));
-    //console.log(ColorName(editPlace.contentDocument.queryCommandValue('backcolor')));
+        if(tempBC!=null){
+            tempBC.selected = true;
+        }
+    }
+    else{
+        var colorPickerFC = buttonPlace.contentDocument.getElementById('forecolor');
+        colorPickerFC.value = ColorName(editPlace.contentDocument.queryCommandValue('forecolor'));
+        var colorPickerFC = buttonPlace.contentDocument.getElementById('backcolor');
+        colorPickerFC.value = ColorName(editPlace.contentDocument.queryCommandValue('backcolor'));
+    }
 }
