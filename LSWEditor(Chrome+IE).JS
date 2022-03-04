@@ -17,7 +17,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     var buttonPlace = document.createElement('iframe');
     buttonPlace.id = 'buttonPlace'
     buttonPlace.frameBorder = 0;
-    buttonPlace.style.height = height+'px';
+    buttonPlace.style.height = '60px';
     buttonPlace.style.width = width+'px';
     buttonPlace.style.background = '#31648c';
     buttonPlace.addEventListener('load',function(){ // 버튼영역의 iframe이 로드 되면 실행 (오류방지)
