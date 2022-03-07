@@ -152,6 +152,7 @@ function CreateButton(buttonName, buttonValue, div, val){ // 버튼 생성 함�
             var tempVal = prompt("URL 혹은 로컬이미지 주소를 입력해주세요.", "");
         }
         ApplyExCo(buttonValue,false,tempVal);
+        CheckStyle();
     }
     div.appendChild(but1);
 
