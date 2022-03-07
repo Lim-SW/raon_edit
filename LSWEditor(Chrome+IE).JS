@@ -43,15 +43,27 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
         // 1번째 줄 셀렉트박스 추가
         var defaultFont = window.getComputedStyle(document.body,null).getPropertyValue("font-family");
         var fontSizeList = {'key':'size','10px':1, '13px':2, '16px':3, '18px':4, '24px':5, '32px':6, '48px':7};
-        var fontFamList = {'key':'family','기본글꼴':defaultFont,'맑은 고딕':'맑은 고딕','굴림':'굴림','궁서':'궁서','휴먼엑스포':'휴먼엑스포','HY엽서L':'HYPost','휴먼매직체':'휴먼매직체','훈민정음체':'문체부 훈민정음체'};
+        if(IsIE()){
+            var fontExcept1 = '맑은 고딕'
+            var fontExcept2 = '문체부 훈민정음체'
+        }
+        else{
+            var fontExcept1 = '"맑은 고딕"'
+            var fontExcept2 = '"문체부 훈민정음체"'
+        }
+        var fontFamList = {'key':'family','기본글꼴':defaultFont,'맑은 고딕':fontExcept1,'굴림':'굴림','궁서':'궁서','휴먼엑스포':'휴먼엑스포','HY엽서L':'HYPost','휴먼매직체':'휴먼매직체','훈민정음체':fontExcept2};
         CreateSelect(fontSizeList,buttonPlace_div1);
         CreateSelect(fontFamList,buttonPlace_div1);
 
-        if(IsIE()){
+        if(IsIE()){LoadCSS(buttonPlace);
             var fontColList = {'key':'color','검정':'#000000','빨강':'#FF0000','파랑':'#0000FF','초록':'#008000','노랑':'#FFFF00','주황':'#FFA500','회색':'#808080','흰색':'#FFFFFF'};
             var backColList = {'key':'backcolor','검정':'#000000','빨강':'#FF0000','파랑':'#0000FF','초록':'#008000','노랑':'#FFFF00','주황':'#FFA500','회색':'#808080','흰색':'#FFFFFF'};
             CreateSelect(fontColList,buttonPlace_div1);
             CreateSelect(backColList,buttonPlace_div1);
+
+            buttonPlace.contentDocument.body.onmousedown = function(e){
+                CheckStyle();
+            } 
         }
         else{        
             // 컬러픽커 추가 (OnlyChrome)
@@ -73,18 +85,6 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
         prevBut.onclick = function(){PreViewPop('test',width)};
         prevBut.style.float = 'right';
         buttonPlace_div1.appendChild(prevBut);
-        
-        if(IsIE()==false){
-            buttonPlace.contentDocument.body.onmouseup = function(e){
-                CheckStyle();
-            }   
-        }
-
-        else{LoadCSS(buttonPlace);
-            buttonPlace.contentDocument.body.onmousedown = function(e){
-                CheckStyle();
-            }   
-        }
 
         LSW_buttonPlace = buttonPlace;
     })
@@ -224,11 +224,13 @@ function CreateSelect(list,div){ // 셀렉트박스 생성 함수
                 else if(this.id=='select family'){
                     buttonPlace.contentDocument.getElementById('글꼴').selected = true;
                 }
-                else if(this.id=='select color'){
-                    buttonPlace.contentDocument.getElementById('color#000000').selected = true;
-                }
-                else if(this.id=='select backcolor'){
-                    buttonPlace.contentDocument.getElementById('backcolor#FFFFFF').selected = true;
+                if(IsIE()){    
+                    if(this.id=='select color'){
+                        buttonPlace.contentDocument.getElementById('color#000000').selected = true;
+                    }
+                    else if(this.id=='select backcolor'){
+                        buttonPlace.contentDocument.getElementById('backcolor#FFFFFF').selected = true;
+                    }
                 }
             }
 
