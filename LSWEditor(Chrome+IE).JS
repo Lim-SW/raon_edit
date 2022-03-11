@@ -287,8 +287,6 @@ function ForIE(param1, param2, param3){ // 브라우저 IE 면 selection, range�
 
     var newNode = editPlace.contentDocument.createTextNode('.');
     selRange.insertNode(newNode);
-    s.removeAllRanges();
-    s.addRange(selRange);
 
     editPlace.contentDocument.execCommand(param1,param2,param3);
 
@@ -296,8 +294,8 @@ function ForIE(param1, param2, param3){ // 브라우저 IE 면 selection, range�
     selRange.setEnd(newNode, 1);
     selRange.deleteContents();
 
-    s.removeAllRanges();
-    s.addRange(selRange);
+    selRange.setStart(newNode, 0);
+    selRange.setEnd(newNode, 1);
 }
 
 function MakeColorPicker(name, div){ // 컬러픽커 생성 함수
