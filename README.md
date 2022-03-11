@@ -9,4 +9,10 @@
 
 (+) CSS iframe의 head 부분으로 이동   
 (+) 모듈화 완료 (클라이언트의 변수와 간섭없도록 전역변수 전체삭제 및 함수내에서 보완)   
-(+) 글배경색, 정렬기능, 취소선 추가, 색상선택방식변경, 영역선택시 상태표시   
+(+) 글배경색, 정렬기능, 색상선택방식변경, 영역선택시 상태표시   
+(+) API로 사용자가 사용가능한 함수 선언   
+(>) getLSWEditPlaceById(id)   
+(>) getLSWButtonPlaceById(id)   
+(>) getLSWEditPlaceValueById(id)      
+
+(X) 두줄이상 선택시 적용   

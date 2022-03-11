@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>LSWEditor_Preview</title>
+    <script src="LSWEditor_Range.JS"></script>
+    <style>#LSWEditor_preview{word-break:break-all;}</style>
+</head>
+<body>
+    <div id="LSWEditor_preview"></div>
+</body>
+<script>
+    document.getElementById('LSWEditor_preview').innerHTML = window.opener.getLSWEditPlaceValueById(this.name);
+</script>
+
+</html>
