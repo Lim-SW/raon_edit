@@ -152,7 +152,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                 ApplyExCo(buttonValue,false,tempVal);
             }
     
-            if(IsIE()==false){RangeLikeEXEC(buttonName,null);}
+            if(IsIE()==false){RangeLikeEXEC(buttonName,null,null);}
             else{ApplyExCo(buttonValue,false,tempVal);}
             CheckStyle();
         }
@@ -242,7 +242,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                     var editPlace = getLSWEditPlaceById(id);
                     var value = select.options[select.selectedIndex].value
                     if(ifKey=='size'){value = select.options[select.selectedIndex].innerText;}
-                    RangeLikeEXEC(ifKey,value); // family color backcolor
+                    RangeLikeEXEC(ifKey,value,null); // family color backcolor
     
                     if(IsIE()){
                         if(ifKey=='color'){
@@ -323,7 +323,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
         colorPicker.onchange = function(e){
             var editPlace = getLSWEditPlaceById(id);
             if(IsIE()==true){ApplyExCo(name,false,e.target.value);}
-            else{RangeLikeEXEC(name,e.target.value);}
+            else{RangeLikeEXEC(name,e.target.value,null);}
             editPlace.contentDocument.body.focus();
         }
         
@@ -435,62 +435,106 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
         }
     }
     
-    function AssembleSpan(node){
-        var node = node;
-        var editPlace = getLSWEditPlaceById(id);
-        var selection = editPlace.contentDocument.getSelection()
-        var range = selection.getRangeAt(0);
+    function AssembleSpan(node, range){
         
         if(node.childNodes.length <= 1){
-            if(node.style != undefined && node.nextElementSibling != null && (node.style.cssText == node.nextElementSibling.style.cssText)){
-                var nodeLen = node.innerText.length;
-                node.innerText += node.nextElementSibling.innerText;
-                node.nextElementSibling.replaceWith('');
-                range.setStart(node,0);
-                range.setEnd(node.childNodes[0],nodeLen);
+            if(node.style != undefined && node.nextElementSibling != null && node.nextElementSibling.style != undefined && node.nextSibling.tagName != undefined){
+                if(node.style.cssText == node.nextElementSibling.style.cssText){
+                    var nodeLen = node.innerText.length;
+                    node.innerText += node.nextElementSibling.innerText;
+                    node.nextElementSibling.replaceWith('');
+                    range.setStart(node,0);
+                    range.setEnd(node.childNodes[0],nodeLen);
+                }
+
             }
-            else if(node.style != undefined && node.previousElementSibling != null && (node.style.cssText == node.previousElementSibling.style.cssText)){
-                var nodeLen = node.previousElementSibling.innerText.length;
-                node.previousElementSibling.innerText += node.innerText;
-                range.setStart(node.previousElementSibling.childNodes[0],nodeLen);
-                range.setEnd(node.previousElementSibling,1);
-                node.replaceWith('');
+            if(node.style != undefined && node.previousElementSibling != null && node.previousElementSibling.style !=undefined && node.previousSibling.tagName != undefined){
+                if(node.style.cssText == node.previousElementSibling.style.cssText){
+                    var nodeLen = node.previousElementSibling.innerText.length;
+                    var nodeLen2 = range.endOffset;
+                    node.previousElementSibling.innerText += node.innerText;
+                    range.setStart(node.previousElementSibling.childNodes[0],nodeLen);
+                    range.setEnd(node.previousElementSibling.childNodes[0],nodeLen+nodeLen2);
+                    node.replaceWith('');
+                }
             }
         }
     
         else{
             for(var n=0;n<node.childNodes.length;n++){
-                if(node.childNodes[n].style != undefined && node.childNodes[n].nextElementSibling != null && (node.childNodes[n].style.cssText == node.childNodes[n].nextElementSibling.style.cssText)){
-                    var nodeLen = node.childNodes[n].innerText.length;
-                    node.childNodes[n].innerText += node.childNodes[n].nextElementSibling.innerText;
-                    node.removeChild(node.childNodes[n].nextElementSibling);
+                if(node.childNodes[n].style != undefined && node.childNodes[n].nextElementSibling != null){
+                    if(node.childNodes[n].style.cssText == node.childNodes[n].nextElementSibling.style.cssText){
+                        var nodeLen = node.childNodes[n].innerText.length;
+                        node.childNodes[n].innerText += node.childNodes[n].nextElementSibling.innerText;
+                        node.removeChild(node.childNodes[n].nextElementSibling);
+                    }
                 }
-                else if(node.childNodes[n].style != undefined && node.childNodes[n].previousElementSibling != null && (node.childNodes[n].style.cssText == node.childNodes[n].previousElementSibling.style.cssText)){
-                    var nodeLen = node.childNodes[n].previousElementSibling.innerText.length;
-                    node.childNodes[n].previousElementSibling.innerText += node.childNodes[n].innerText;
-                    node.removeChild(node.childNodes[n]);
+                if(node.childNodes[n].style != undefined && node.childNodes[n].previousElementSibling != null){
+                    if(node.childNodes[n].style.cssText == node.childNodes[n].previousElementSibling.style.cssText){
+                        var nodeLen = node.childNodes[n].previousElementSibling.innerText.length;
+                        node.childNodes[n].previousElementSibling.innerText += node.childNodes[n].innerText;
+                        node.removeChild(node.childNodes[n]);
+                    }
                 }
             }
             range.insertNode(node);
         }
     }
     
-    function RangeLikeEXEC(key, value){
+    function RangeLikeEXEC(key, value, recall, range2){
         var editPlace = getLSWEditPlaceById(id);
-        var selection = editPlace.contentDocument.getSelection()
-        var range = selection.getRangeAt(0);
-        var pn = range.startContainer.parentNode;
-        
+
         if(key=='Left' || key=='Right' || key=='Center'){
-            while(pn.tagName != 'P'){
-                pn = pn.parentNode;
+            var selection = editPlace.contentDocument.getSelection()
+            var range = selection.getRangeAt(0);
+            var pn = range.startContainer.parentNode;
+            if(range.startContainer != range.endContainer){
+                var node1 = range.extractContents();
+                for(var align = 0;align<node1.childNodes.length;align++){
+                    node1.childNodes[align].style.textAlign = key;   
+                }
+                pn.parentNode.removeChild(pn.nextSibling);
+                pn.replaceWith(node1);
             }
-            pn.style.textAlign = key;
+            else{
+                if(pn.tagName == 'HTML'){
+                    pn = pn.childNodes[1]; // body
+                    var node1 = range.cloneContents();
+                    for(var align = 0;align<node1.childNodes.length;align++){
+                        node1.childNodes[align].style.textAlign = key;
+                    }
+                    range.insertNode(node1);
+                }
+                else if(pn.tagName == 'BODY'){
+                    pn = pn.childNodes[1]; // body
+                    var node1 = range.cloneContents();
+                    for(var align = 0;align<node1.childNodes.length;align++){
+                        node1.childNodes[align].style.textAlign = key;
+                    }
+                    range.insertNode(node1);
+                }
+                else{
+                    while(pn.tagName != 'P'){
+                        pn = pn.parentNode;
+                    }
+                    pn.style.textAlign = key;
+                }
+                
+            }
 
             return null;
         }
-
-        var node1 = range.extractContents();
+        if(recall==null||recall.tagName!='P'){
+            var selection = editPlace.contentDocument.getSelection()
+            var range = selection.getRangeAt(0);
+            var pn = range.startContainer.parentNode;
+            var node1 = range.extractContents();
+        }
+        else{
+            var range = range2;
+            var pn = range.startContainer.parentNode;
+            var node1 = recall;
+        }
     
         if(pn.nodeName == 'SPAN'&&node1.childNodes.length==1){
             var firstNode = editPlace.contentDocument.createElement('span');
@@ -540,7 +584,8 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
             range.setEnd(tempNode,1);
 
             CleanEmptySpan();
-            AssembleSpan(tempNode);
+            AssembleSpan(tempNode,range);
+            CleanEmptySpan();
         }
     
         else if(node1.childNodes.length==0){ // 여기가 그냥클릭 스판 안에있을때 아닐때 구분해야함...
@@ -553,10 +598,6 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                 return null;
             }
         }
-        
-        //else if(node1.childNodes[0].tagName == 'P'){ // 두줄 이상
-        //    console.log('에베베');
-        //}
 
         else{ // 'BODY' or 'P'
             var tempNode = editPlace.contentDocument.createElement('span');
@@ -607,19 +648,71 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                     range.setStart(tempNode,0);
                     range.setEnd(tempNode,1);
                 }
+                else if(range.startContainer.tagName == 'P'){
+                    range.startContainer.innerHTML = tempNode.outerHTML;
+                }
                 else{
                     range.insertNode(tempNode);
                 }
                 CleanEmptySpan();
-                AssembleSpan(tempNode);
+                AssembleSpan(tempNode,range);
+                CleanEmptySpan();
             }
     
             else{
                 var chiNo = node1.childNodes;
                 var flag = 0;
+                var lastPN = pn;
                 if(chiNo[0].tagName == 'P'){
-                    console.log('이건 또 언제하냐 ㅋ');
+                    if(pn.tagName!='P'){
+                        pn = pn.parentNode;
+                    }
+                    for(var l=0;l<chiNo.length;l++){
+                        range.setStart(chiNo[l],0);
+                        range.setEnd(chiNo[l],1);
+                        RangeLikeEXEC(key,value,chiNo[l],range);
+                        if(l==0 || l==1){   
+                            if(l==0){
+                                if(pn.innerHTML!=''){
+                                    pn.after(chiNo[l].cloneNode());
+                                    pn = pn.nextSibling;
+                                    pn.innerHTML = chiNo[l].innerHTML;
+                                    lastPN = pn;
+                                }
+                                else{
+                                    pn.innerHTML = chiNo[l].innerHTML;
+                                    pn = pn.nextSibling;
+                                    lastPN = pn;
+                                }
+                            }
+                            else if(l==1&&pn.innerHTML!=''){
+                                if(pn.innerHTML == chiNo[l-1].innerHTML){
+                                    pn.after(chiNo[l].cloneNode());
+                                    pn = pn.nextSibling;
+                                    pn.innerHTML = chiNo[l].innerHTML;
+                                    lastPN = pn;
+                                }
+                                else{
+                                    pn.before(chiNo[l].cloneNode());
+                                    pn = pn.previousSibling;
+                                    pn.innerHTML = chiNo[l].innerHTML;
+                                    lastPN =pn;
+                                }
+                            }
+                        }
+                        else{
+                            pn.after(chiNo[l].cloneNode());
+                            pn = pn.nextSibling;
+                            pn.innerHTML = chiNo[l].innerHTML;
+                            if(l==chiNo.length-1){
+                                lastPN = pn.nextSibling;
+                            }
+                        }
+                    }
+                    range.setStart(lastPN,0);
+                    range.setEnd(lastPN,1);
                 }
+
                 else{
                     for(var sp=0;sp<chiNo.length;sp++){
                         var tempNode = editPlace.contentDocument.createElement('span');
@@ -680,8 +773,6 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                         else if(key=='family' && chiNo[sp].style.fontFamily != value){chiNo[sp].style.fontFamily = value;flag = 1;}
                         else if(key=='forecolor'&& chiNo[sp].style.color != value){chiNo[sp].style.color = value;flag = 1;}
                         else if(key=='backcolor'&& chiNo[sp].style.backgroundColor != value){chiNo[sp].style.backgroundColor = value;flag = 1;}
-                        CleanEmptySpan();
-                        AssembleSpan(node1);
                     }
                     if(flag == 0){
                         for(var sp=0;sp<chiNo.length;sp++){
@@ -710,10 +801,11 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                                 tempNode.innerText = chiNo[sp].textContent;
                                 node1.replaceChild(tempNode,chiNo[sp]);
                             }
-                            CleanEmptySpan();
-                            AssembleSpan(node1);
                         }    
                     }
+                    CleanEmptySpan();
+                    AssembleSpan(node1,range);
+                    CleanEmptySpan();
                 }
             }
         }

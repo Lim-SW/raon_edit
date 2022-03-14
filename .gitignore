@@ -1,6 +1,8 @@
 *.docx
 *.txt
 *.png
+*.config
+*.ini
 
 LSWEditor(Class).html
 LSWEditor(Class).JS
