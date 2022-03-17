@@ -290,8 +290,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     }
     
     function IsIE() { // 브라우저 IE 체크 함수
-        var agent = navigator.userAgent.toLowerCase();
-        return (navigator.appName == 'Netscape' && agent.indexOf('trident') != -1) || (agent.indexOf("msie") != -1);
+        return document.all || (!!window.MSInputMethodContext && !!document.documentMode);
     }
     
     function ForIE(param1, param2, param3){ //
