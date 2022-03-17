@@ -148,11 +148,16 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
               e.preventDefault();
             }
             if(val == 'src'){
-                var tempVal = prompt("URL 혹은 로컬이미지 주소를 입력해주세요.", "");
-                ApplyExCo(buttonValue,false,tempVal);
+                var tempVal = prompt("URL 혹은 로컬이미지 주소를 입력해주세요.", "test.png");
+                if(tempVal==null || tempVal==''){
+
+                }
+                else{
+                    ApplyExCo(buttonValue,false,tempVal);
+                }
             }
     
-            if(IsIE()==false){RangeLikeEXEC(buttonName,null);}
+            else if(IsIE()==false){RangeLikeEXEC(buttonName,null,null);}
             else{ApplyExCo(buttonValue,false,tempVal);}
             CheckStyle();
         }
@@ -242,8 +247,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                     var editPlace = getLSWEditPlaceById(id);
                     var value = select.options[select.selectedIndex].value
                     if(ifKey=='size'){value = select.options[select.selectedIndex].innerText;}
-                    RangeLikeEXEC(ifKey,value); // family color backcolor
-    
+                    
                     if(IsIE()){
                         if(ifKey=='color'){
                             ApplyExCo("ForeColor",false,select.options[select.selectedIndex].value)// 여기여기
@@ -251,7 +255,14 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                         else if(ifKey=='backcolor'){
                             ApplyExCo("BackColor",false,select.options[select.selectedIndex].value)// 여기여기
                         }
-                    }   
+                        else if(ifKey=='family'){
+                            ApplyExCo("FontName",false,select.options[select.selectedIndex].value)// 여기여기
+                        }
+                        else if(ifKey=='size'){
+                            ApplyExCo("FontSize",false,select.options[select.selectedIndex].value)// 여기여기
+                        }
+                    }
+                    else{RangeLikeEXEC(ifKey,value,null);} // family color backcolor
                     editPlace.contentDocument.body.focus();
                 }
             }
@@ -279,7 +290,8 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     }
     
     function IsIE() { // 브라우저 IE 체크 함수
-        return document.all || (!!window.MSInputMethodContext && !!document.documentMode);
+        var agent = navigator.userAgent.toLowerCase();
+        return (navigator.appName == 'Netscape' && agent.indexOf('trident') != -1) || (agent.indexOf("msie") != -1);
     }
     
     function ForIE(param1, param2, param3){ //
@@ -289,15 +301,17 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
     
         var newNode = editPlace.contentDocument.createTextNode('.');
         selRange.insertNode(newNode);
-    
+        s.removeAllRanges();
+        s.addRange(selRange);
+
         editPlace.contentDocument.execCommand(param1,param2,param3);
-    
+
         selRange.setStart(newNode, 0);
         selRange.setEnd(newNode, 1);
         selRange.deleteContents();
-    
-        selRange.setStart(newNode, 0);
-        selRange.setEnd(newNode, 1);
+        
+        s.removeAllRanges();
+        s.addRange(selRange);
     }
     
     function MakeColorPicker(name, div){ // 컬러픽커 생성 함수
@@ -323,7 +337,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
         colorPicker.onchange = function(e){
             var editPlace = getLSWEditPlaceById(id);
             if(IsIE()==true){ApplyExCo(name,false,e.target.value);}
-            else{RangeLikeEXEC(name,e.target.value);}
+            else{RangeLikeEXEC(name,e.target.value,null);}
             editPlace.contentDocument.body.focus();
         }
         
@@ -433,64 +447,129 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                 spans[el].parentNode.removeChild(spans[el]);
             }
         }
+        var ps = editPlace.contentDocument.getElementsByTagName('p')
+        for (var el=0;el<ps.length;el++) {
+            if (ps[el].innerHTML == '&nbsp;' || ps[el].innerHTML == '') {
+                ps[el].parentNode.removeChild(ps[el]);
+            }
+        }
     }
     
-    function AssembleSpan(node){
-        var node = node;
-        var editPlace = getLSWEditPlaceById(id);
-        var selection = editPlace.contentDocument.getSelection()
-        var range = selection.getRangeAt(0);
+    function AssembleSpan(node, range){
         
         if(node.childNodes.length <= 1){
-            if(node.style != undefined && node.nextElementSibling != null && (node.style.cssText == node.nextElementSibling.style.cssText)){
-                var nodeLen = node.innerText.length;
-                node.innerText += node.nextElementSibling.innerText;
-                node.nextElementSibling.replaceWith('');
-                range.setStart(node,0);
-                range.setEnd(node.childNodes[0],nodeLen);
+            if(node.style != undefined && node.nextElementSibling != null && node.nextElementSibling.style != undefined && node.nextSibling.tagName != undefined){
+                if(node.style.cssText == node.nextElementSibling.style.cssText){
+                    var nodeLen = node.innerText.length;
+                    node.innerText += node.nextElementSibling.innerText;
+                    node.nextElementSibling.replaceWith('');
+                    range.setStart(node,0);
+                    range.setEnd(node.childNodes[0],nodeLen);
+                }
+
             }
-            else if(node.style != undefined && node.previousElementSibling != null && (node.style.cssText == node.previousElementSibling.style.cssText)){
-                var nodeLen = node.previousElementSibling.innerText.length;
-                node.previousElementSibling.innerText += node.innerText;
-                range.setStart(node.previousElementSibling.childNodes[0],nodeLen);
-                range.setEnd(node.previousElementSibling,1);
-                node.replaceWith('');
+            if(node.style != undefined && node.previousElementSibling != null && node.previousElementSibling.style !=undefined && node.previousSibling.tagName != undefined){
+                if(node.style.cssText == node.previousElementSibling.style.cssText){
+                    var nodeLen = node.previousElementSibling.innerText.length;
+                    var nodeLen2 = range.endOffset;
+                    node.previousElementSibling.innerText += node.innerText;
+                    range.setStart(node.previousElementSibling.childNodes[0],nodeLen);
+                    range.setEnd(node.previousElementSibling.childNodes[0],nodeLen+nodeLen2);
+                    node.replaceWith('');
+                }
             }
         }
     
         else{
             for(var n=0;n<node.childNodes.length;n++){
-                if(node.childNodes[n].style != undefined && node.childNodes[n].nextElementSibling != null && (node.childNodes[n].style.cssText == node.childNodes[n].nextElementSibling.style.cssText)){
-                    var nodeLen = node.childNodes[n].innerText.length;
-                    node.childNodes[n].innerText += node.childNodes[n].nextElementSibling.innerText;
-                    node.removeChild(node.childNodes[n].nextElementSibling);
+                if(node.childNodes[n].style != undefined && node.childNodes[n].nextElementSibling != null){
+                    if(node.childNodes[n].style.cssText == node.childNodes[n].nextElementSibling.style.cssText){
+                        var nodeLen = node.childNodes[n].innerText.length;
+                        node.childNodes[n].innerText += node.childNodes[n].nextElementSibling.innerText;
+                        node.removeChild(node.childNodes[n].nextElementSibling);
+                    }
                 }
-                else if(node.childNodes[n].style != undefined && node.childNodes[n].previousElementSibling != null && (node.childNodes[n].style.cssText == node.childNodes[n].previousElementSibling.style.cssText)){
-                    var nodeLen = node.childNodes[n].previousElementSibling.innerText.length;
-                    node.childNodes[n].previousElementSibling.innerText += node.childNodes[n].innerText;
-                    node.removeChild(node.childNodes[n]);
+                if(node.childNodes[n].style != undefined && node.childNodes[n].previousElementSibling != null){
+                    if(node.childNodes[n].style.cssText == node.childNodes[n].previousElementSibling.style.cssText){
+                        var nodeLen = node.childNodes[n].previousElementSibling.innerText.length;
+                        node.childNodes[n].previousElementSibling.innerText += node.childNodes[n].innerText;
+                        node.removeChild(node.childNodes[n]);
+                    }
                 }
             }
             range.insertNode(node);
         }
+        CleanEmptySpan();
     }
     
-    function RangeLikeEXEC(key, value){
+    function RangeLikeEXEC(key, value, recall, range2){
         var editPlace = getLSWEditPlaceById(id);
-        var selection = editPlace.contentDocument.getSelection()
-        var range = selection.getRangeAt(0);
-        var pn = range.startContainer.parentNode;
-        
-        if(key=='Left' || key=='Right' || key=='Center'){
-            while(pn.tagName != 'P'){
-                pn = pn.parentNode;
-            }
-            pn.style.textAlign = key;
 
+        if(key=='Left' || key=='Right' || key=='Center'){
+            var selection = editPlace.contentDocument.getSelection()
+            var range = selection.getRangeAt(0);
+            var pn = range.startContainer;
+            var en = range.endContainer;
+            if(range.startContainer.tagName == undefined||range.startContainer.tagName=='SPAN'){
+                while(pn.tagName != 'P'){
+                    pn = pn.parentNode;
+                }
+                while(en.tagName != 'P'){
+                    en = en.parentNode;
+                }
+                range.setStart(pn,0);
+                range.setEnd(en,1);
+            }
+            var node1 = range.extractContents();
+            if(range.startContainer != range.endContainer){
+                for(var align = 0;align<node1.childNodes.length;align++){
+                    if(node1.childNodes[align].textContent == ''&&pn.tagName=='P'){
+                        pn.style.textAlign = key;
+                    }
+                    else{
+                        node1.childNodes[align].style.textAlign = key;  
+                    }
+                }
+                //pn.parentNode.removeChild(pn.nextSibling);
+            }
+            else{
+                if(pn.tagName == 'HTML'){
+                    //pn = pn.childNodes[1];
+                    for(var align = 0;align<node1.childNodes.length;align++){
+                        node1.childNodes[align].style.textAlign = key;
+                    }
+                }
+                else{
+                    //pn = pn.childNodes[1]; // body
+                    for(var align = 0;align<node1.childNodes.length;align++){
+                        if(node1.childNodes[align].style == undefined){
+                            pn.style.textAlign = key;
+                            en.style.textAlign = key;
+                        }
+                        else{
+                            node1.childNodes[align].style.textAlign = key;
+                        }
+                    }
+                    if(node1.childNodes.length == 0){
+                        range.startContainer.style.textAlign = key;
+                    }
+                }              
+            }
+            range.insertNode(node1);
+            CleanEmptySpan();
             return null;
         }
-
-        var node1 = range.extractContents();
+        if(recall==null||recall.tagName!='P'){
+            var selection = editPlace.contentDocument.getSelection();
+            var range = selection.getRangeAt(0);
+            var pn = range.startContainer.parentNode;
+            var node1 = range.extractContents();
+        }
+        else{
+            var range = range2;
+            var pn = range.startContainer.parentNode;
+            var node1 = recall;
+        }
     
         if(pn.nodeName == 'SPAN'&&node1.childNodes.length==1){
             var firstNode = editPlace.contentDocument.createElement('span');
@@ -522,7 +601,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
             else if(key=='backcolor'&&pn.style.backgroundColor != value){tempNode.style.backgroundColor = value;}
             
             if(node1.childNodes.length==0){
-                console.log('ㄴㄴ');
+                // 여기가 빈 span태그 추가하는 자리인데...
             }
 
             else{
@@ -540,7 +619,9 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
             range.setEnd(tempNode,1);
 
             CleanEmptySpan();
-            AssembleSpan(tempNode);
+            if(recall.tagName!='P'){
+                AssembleSpan(tempNode,range);
+            }
         }
     
         else if(node1.childNodes.length==0){ // 여기가 그냥클릭 스판 안에있을때 아닐때 구분해야함...
@@ -553,10 +634,6 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                 return null;
             }
         }
-        
-        //else if(node1.childNodes[0].tagName == 'P'){ // 두줄 이상
-        //    console.log('에베베');
-        //}
 
         else{ // 'BODY' or 'P'
             var tempNode = editPlace.contentDocument.createElement('span');
@@ -607,19 +684,46 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                     range.setStart(tempNode,0);
                     range.setEnd(tempNode,1);
                 }
+                //else if(range.startContainer.tagName == 'P'){
+                //    range.startContainer.innerHTML = tempNode.outerHTML;
+                //}
                 else{
                     range.insertNode(tempNode);
                 }
                 CleanEmptySpan();
-                AssembleSpan(tempNode);
+                if(recall.tagName!='P'){
+                    AssembleSpan(tempNode,range);
+                }
             }
     
-            else{
+            else{ // 여기좀보세요
                 var chiNo = node1.childNodes;
                 var flag = 0;
                 if(chiNo[0].tagName == 'P'){
-                    console.log('이건 또 언제하냐 ㅋ');
+                    //CleanEmptySpan();
+                    if(pn.tagName!='P'){
+                        pn = pn.parentNode;
+                    }
+                    for(var l=0;l<chiNo.length;l++){
+                        range.setStart(chiNo[l],0);
+                        range.setEnd(chiNo[l],1);
+                        RangeLikeEXEC(key,value,chiNo[l],range);
+                        for(var s=0;s<chiNo[l].childNodes.length;s++){
+                            if(chiNo[l].childNodes[s].tagName == undefined){
+                                chiNo[l].removeChild(chiNo[l].childNodes[s]);
+                            }
+                        }
+                    }
+                    
+                    if(pn.tagName != undefined){
+                        pn.replaceWith('');
+                    }
+                    range = selection.getRangeAt(0);
+                    range.insertNode(node1);
+
+                    return null;
                 }
+
                 else{
                     for(var sp=0;sp<chiNo.length;sp++){
                         var tempNode = editPlace.contentDocument.createElement('span');
@@ -671,17 +775,15 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                             }
                         }
                         else if(key=='B' && chiNo[sp].style.fontWeight != 'bold'){chiNo[sp].style.fontWeight = 'bold';flag = 1;}
-                        else if(key=='B' && chiNo[sp].style.fontWeight == 'bold'){chiNo[sp].style.fontWeight = 'normal';}
+                        //else if(key=='B' && chiNo[sp].style.fontWeight == 'bold'){chiNo[sp].style.fontWeight = 'normal';}
                         else if(key=='I' && chiNo[sp].style.fontStyle != 'italic'){chiNo[sp].style.fontStyle = 'italic';flag = 1;}
-                        else if(key=='I' && chiNo[sp].style.fontStyle == 'italic'){chiNo[sp].style.fontStyle = 'normal';}
+                        //else if(key=='I' && chiNo[sp].style.fontStyle == 'italic'){chiNo[sp].style.fontStyle = 'normal';}
                         else if(key=='U' && chiNo[sp].style.textDecoration != 'underline'){chiNo[sp].style.textDecoration = 'underline';flag = 1;}
-                        else if(key=='U' && chiNo[sp].style.textDecoration == 'underline'){chiNo[sp].style.textDecoration = '';}
+                        //else if(key=='U' && chiNo[sp].style.textDecoration == 'underline'){chiNo[sp].style.textDecoration = '';}
                         else if(key=='size' && chiNo[sp].style.fontSize != value){chiNo[sp].style.fontSize = value;flag = 1;}
                         else if(key=='family' && chiNo[sp].style.fontFamily != value){chiNo[sp].style.fontFamily = value;flag = 1;}
                         else if(key=='forecolor'&& chiNo[sp].style.color != value){chiNo[sp].style.color = value;flag = 1;}
                         else if(key=='backcolor'&& chiNo[sp].style.backgroundColor != value){chiNo[sp].style.backgroundColor = value;flag = 1;}
-                        CleanEmptySpan();
-                        AssembleSpan(node1);
                     }
                     if(flag == 0){
                         for(var sp=0;sp<chiNo.length;sp++){
@@ -692,7 +794,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                                 }
                                 if(key=='B'){chiNo[sp].style.fontWeight = 'normal';}
                                 else if(key=='I'){chiNo[sp].style.fontStyle = 'normal';}
-                                else if(key=='U'){chiNo[sp].style.textDecoration = 'normal';}
+                                else if(key=='U'){chiNo[sp].style.textDecoration = '';}
                                 else if(key=='size'){chiNo[sp].style.fontSize = value;}
                                 else if(key=='family'){chiNo[sp].style.fontFamily = value;}
                                 else if(key=='forecolor'){chiNo[sp].style.color = value;}
@@ -701,7 +803,7 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                             else{
                                 if(key=='B'){tempNode.style.fontWeight = 'normal';}//
                                 else if(key=='I'){tempNode.style.fontStyle = 'normal';}//
-                                else if(key=='U'){tempNode.style.textDecoration = 'normal';}//
+                                else if(key=='U'){tempNode.style.textDecoration = '';}//
                                 else if(key=='size'){tempNode.style.fontSize = value;}//
                                 else if(key=='family'){tempNode.style.fontFamily = value;}//
                                 else if(key=='forecolor'){chiNo[sp].style.color = value;}
@@ -710,9 +812,11 @@ function LoadLSWEditor(id, width, height, divName){// 에디터 생성 함수
                                 tempNode.innerText = chiNo[sp].textContent;
                                 node1.replaceChild(tempNode,chiNo[sp]);
                             }
-                            CleanEmptySpan();
-                            AssembleSpan(node1);
                         }    
+                    }
+                    CleanEmptySpan();
+                    if(recall.tagName!='P'){
+                        AssembleSpan(node1,range);
                     }
                 }
             }

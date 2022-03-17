@@ -1,18 +1,36 @@
-# raon_edit
+﻿# raon_edit
 라온위즈 2차과제(에디터)      
 
 (O) 사용자는 웹 브라우저를 통하여 글을 작성할 수 있어야 한다.   
 (O) 서식기능 지원(글꼴종류, 글꼴크기, 글꼴색, 볼드, 이탤릭, 언더라인)   
 (O) 지원 브라우저는 IE10이상, Chrome을 대상으로 한다.   
 (O) 에디터에서 작성한 컨텐츠는 미리보기 창 제공   
-(O) 이미지 삽입      
+(O) 이미지 삽입 제공 (서버가 아닌 execcommand 활용/서버는 업로드 때)      
 
-(+) CSS iframe의 head 부분으로 이동   
+(+) CSS를 iframe의 head 부분으로 이동   
 (+) 모듈화 완료 (클라이언트의 변수와 간섭없도록 전역변수 전체삭제 및 함수내에서 보완)   
-(+) 글배경색, 정렬기능, 색상선택방식변경, 영역선택시 상태표시   
+(+) 에디터 여러개 생성시 각각 동작하도록 구현 완료   
+(+) 글배경색, 정렬기능, 색상선택 방식변경(크롬에서colorpicker), 영역선택시 상태표시   
 (+) API로 사용자가 사용가능한 함수 선언   
-(>) getLSWEditPlaceById(id)   
-(>) getLSWButtonPlaceById(id)   
-(>) getLSWEditPlaceValueById(id)      
+(>) getLSWEditPlaceById(id) 에디터영역 접근 API함수   
+(>) getLSWButtonPlaceById(id) 버튼영역 접근 API함수   
+(>) getLSWEditPlaceValueById(id) 에디터영역의 내용을 가져오는 API함수   
+(+) 서식적용시 겹치는 부분의 경우 의도한대로 적용되도록 구현 (한줄은 거의 완벽히 적용)   
+(+) SPAN태그가 이웃하면 확인 후 하나의 SPAN태그로 합치도록 구현   
+(>) 되도록이면 적용되도록 하였으나 간헐적으로 안 합쳐지는 현상이 있습니다.   
 
-(X) 두줄이상 선택시 적용   
+(△) 두줄이상 선택시 적용 (불안정함)   
+(>) P 태그 전체영역으로 안지정할 시 문자열은 다 보존되지만 따로 P태그를 적용   
+(△) IE는 colorpicker 대신 select box, execcommand 적용   
+(△) 단일커서에서 서식 적용시 적용 안됨      
+
+ - (O) = 필수사항을 구현하였습니다.   
+ - (+) = 추가로 구현하였습니다.   
+ - (>) = 바로 위에 사항의 추가적인 내용입니다.   
+ - (△) = 덜됐습니다.      
+
+Execcommand 활용버전   
+- http://112.136.138.139:6521/execCommand/LSWEditor_ExecCommand.html   
+Range 활용버전   
+- http://112.136.138.139:6521/LSWEditor_Range.html   
+
