@@ -15,7 +15,6 @@
 (>) getLSWEditPlaceById(id) 에디터영역 접근 API함수   
 (>) getLSWButtonPlaceById(id) 버튼영역 접근 API함수   
 (>) getLSWEditPlaceValueById(id) 에디터영역의 내용을 가져오는 API함수   
-<<<<<<< HEAD
 (+) 서식적용시 겹치는 부분의 경우 의도한대로 적용되도록 구현 (한줄은 거의 완벽히 적용)   
 (+) SPAN태그가 이웃하면 확인 후 하나의 SPAN태그로 합치도록 구현   
 (>) 되도록이면 적용되도록 하였으나 간헐적으로 안 합쳐지는 현상이 있습니다.   
@@ -35,11 +34,3 @@ Execcommand 활용버전
 Range 활용버전   
 - http://112.136.138.139:6521/LSWEditor_Range.html   
 
-=======
-(+) 서식적용시 겹치는 부분의 경우 의도한대로 적용되도록 구현 (한줄은 거의 완벽히 적용)      
-
-(△) 두줄이상 선택시 적용 (불안정함)   
-(>) P 태그 전체영역으로 안지정할 시 문자열은 다 보존되지만 따로 P태그를 적용   
-(△) IE는 colorpicker 대신 select box, execcommand 적용   
-(△) 단일커서에서 서식 적용시 적용 안됨   
->>>>>>> 9fdf508564274810ff4de9a4fbc86d6a7b46cb89

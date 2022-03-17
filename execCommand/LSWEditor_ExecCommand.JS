@@ -276,7 +276,8 @@ function PreViewPop(content, width){ // 미리보기 팝업 함수
 }
 
 function IsIE() { // 브라우저 IE 체크 함수
-    return document.all || (!!window.MSInputMethodContext && !!document.documentMode);
+    var agent = navigator.userAgent.toLowerCase();
+    return (navigator.appName == 'Netscape' && agent.indexOf('trident') != -1) || (agent.indexOf("msie") != -1);
 }
 
 function ForIE(param1, param2, param3){ // 브라우저 IE 면 selection, range도 적용
